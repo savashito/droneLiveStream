@@ -108,6 +108,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     public void onDestroy() {
         super.onDestroy();
+        Log.d(TAG, "OnDestroy");
+        mClientStream.close();
         if (mOpenCvCameraView != null)
             mOpenCvCameraView.disableView();
     }

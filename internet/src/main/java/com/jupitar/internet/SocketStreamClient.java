@@ -22,6 +22,12 @@ public class SocketStreamClient extends Thread{
         mSize = 16 * 1024;
     }
 
+    public void close(){
+//        try {
+            mRunning = false;
+
+    }
+
     byte[] testBuffer(){
         int n = mSize*12;
         byte[] bigTestBuffer = new byte[n];
@@ -44,6 +50,7 @@ public class SocketStreamClient extends Thread{
         mMessage = false;
         while(mRunning) {
             if(mMessage) {
+                mMessage = true;
                 sendInternal();
             }
 
@@ -59,6 +66,7 @@ public class SocketStreamClient extends Thread{
         mMessage = true;
         mData = text.getBytes();
     }*/
+
     private void sendInternal(){
 
         ByteArrayInputStream bInput = new ByteArrayInputStream(mData);
