@@ -9,14 +9,16 @@ import android.view.WindowManager;
 import android.widget.Button;
 
 import com.jupitar.internet.ConfigUDPConection;
-import com.jupitar.internet.SocketStreamClient;
-//import com.jupitar.internet.SocketUDP;
+import com.jupitar.vp8.VP8WebEncoder;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
+
+//import com.jupitar.internet.SocketUDP;
 
 public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
     private static final String TAG = "OCVSample::Activity";
@@ -24,7 +26,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private CameraBridgeViewBase mOpenCvCameraView;
     private boolean              mIsJavaCamera = true;
     private byte [] mbImage;
-    SocketStreamClient mClientStream;
+//    SocketStreamClient mClientStream;
+    VP8WebEncoder mVP8WebEncoder;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -34,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 {
                     Log.i(TAG, "OpenCV loaded successfully");
                     mOpenCvCameraView.enableView();
+                    mOpenCvCameraView.SetCaptureFormat(21);
                 } break;
                 default:
                 {
@@ -68,16 +72,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Button b = (Button) findViewById(R.id.button);
 
         ConfigUDPConection config = new ConfigUDPConection();
-        mClientStream = new SocketStreamClient(config);
-        mClientStream.start();
-//        mServerConection = new SocketUDP();
-//        mServerConection.execute(config);
+//        mClientStream = new SocketStreamClient(config);
+        mVP8WebEncoder = new VP8WebEncoder(config);
+        mVP8WebEncoder.start();
+//        mClientStream.start();
         b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.e("fd", "Miau envio");
-               // mClientStream.send("Miauuu");
-//                mServerConection.send("Miauuu");
 
             }
         });
@@ -109,7 +111,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "OnDestroy");
-        mClientStream.close();
+//        mClientStream.close();
+        mVP8WebEncoder.close();
         if (mOpenCvCameraView != null)
             mOpenCvCameraView.disableView();
     }
@@ -127,12 +130,26 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+      
         Mat in = inputFrame.rgba();
-        byte[] imageInBytes = getByteImageArray(in);
+        Mat out = new Mat();
+        Imgproc.cvtColor(in,out, Imgproc.COLOR_BGRA2YUV_I420);
+        Log.d(TAG, String.format("New size: %d * %d", out.channels(), out.total()));
+
+//        cvtColor(original_image, converted_image, CV_BGR2YCrCb);
+//        Log.d(TAG,String.format("New size: %d * %d",in.channels(),in.total()));
+        byte[] imageInBytes = getByteImageArray(out);
         in.get(0, 0, imageInBytes);
-      //  mServerConection.send("Bark!! and this is a longer bark!!");
-//        mServerConection.send(imageInBytes);
-        mClientStream.send(imageInBytes);
+        mVP8WebEncoder.setFrameSize((int) in.size().width, (int) in.size().height);
+        mVP8WebEncoder.send(imageInBytes);
+        byte [] decodedFrame = mVP8WebEncoder.popDecodedFrame();
+        if(decodedFrame!=null){
+            Log.d(TAG,String.format("Decoded FRame lenght %d",decodedFrame.length));
+            //in.se = decodedFrame;
+        }
+
+
+//        mClientStream.send(imageInBytes);
        // Log.e("fd",imageInBytes.length+"");
         /*
         Size sOut = new Size();

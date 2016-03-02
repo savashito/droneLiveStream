@@ -17,7 +17,7 @@ public class ConfigUDPConection {
 */
     public ConfigUDPConection() {
         mPort = 9876;
-        try {
+        try {// 192.168.0.236
             mInetAddress = InetAddress.getByName("192.168.0.236");
         } catch (UnknownHostException e) {
             e.printStackTrace();

@@ -39,7 +39,7 @@ public class VP8Encoder {
         MediaFormat format = MediaFormat.createVideoFormat(VP8_MIME, frameWidth, frameHeight);
         format.setInteger(MediaFormat.KEY_BIT_RATE, 100000);
         format.setInteger(MediaFormat.KEY_COLOR_FORMAT,
-                MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar);
+                MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);
         format.setInteger(MediaFormat.KEY_FRAME_RATE, 30);
         Log.d(TAG, "Creating encoder");
         MediaCodec encoder;
