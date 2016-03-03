@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
       
         Mat in = inputFrame.rgba();
-        Mat out = new Mat();
+        Mat out = new Mat();Imgproc.COLOR_YUV2BGR_I420
         Imgproc.cvtColor(in,out, Imgproc.COLOR_BGRA2YUV_I420);
         Log.d(TAG, String.format("New size: %d * %d", out.channels(), out.total()));
 

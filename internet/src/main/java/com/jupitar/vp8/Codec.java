@@ -37,7 +37,7 @@ public class Codec {
         mFrameIndex = 0;
         mBufferInfo  = new MediaCodec.BufferInfo();
         mCodecConfiguration = codecConfiguration;
-
+        mEncoder = null;
     }
     // 1 146 880
     // 1 382 400
@@ -68,6 +68,10 @@ public class Codec {
         mEncoder.start();
         mInputBuffers = mEncoder.getInputBuffers();
         mOutputBuffers = mEncoder.getOutputBuffers();
+    }
+    public void stop(){
+        if(mEncoder!=null)
+            mEncoder.stop();
     }
     public static void listCodecs() {
         int numCodecs = MediaCodecList.getCodecCount();
@@ -118,8 +122,14 @@ public class Codec {
     }
 
     public byte[] popCodedFrame() {
-        int result = mEncoder.dequeueOutputBuffer(mBufferInfo, DEFAULT_TIMEOUT_US);
-        byte[] buffer = new byte[mBufferInfo.size];
+        int result=-1;
+        try {
+            result = mEncoder.dequeueOutputBuffer(mBufferInfo, DEFAULT_TIMEOUT_US);
+        }catch (Exception e){
+            Log.d(TAG,e.getLocalizedMessage());
+            return null;
+        }
+            byte[] buffer = new byte[mBufferInfo.size];
         if (result >= 0) {
             int outputBufIndex = result;
             mOutputBuffers[outputBufIndex].rewind();

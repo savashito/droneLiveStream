@@ -15,6 +15,7 @@ public class VP8WebEncoder extends Thread{
     AVCEncoder mVP8Encoder;
     AVCDecoder mVP8Decoder;
     VideoStreamConection mVideoStreamConection;
+    byte[] rawFrame;
     // byte[] mFrameData;
     public VP8WebEncoder(ConfigUDPConection config) {
         mFramesToEncode = 0;
@@ -22,6 +23,7 @@ public class VP8WebEncoder extends Thread{
         mVP8Decoder = new AVCDecoder();
         mThreadRunning = true;
         mVideoStreamConection = new VideoStreamConection(config);
+        rawFrame = null;
     }
 
     @Override
@@ -36,7 +38,8 @@ public class VP8WebEncoder extends Thread{
                 mVP8Decoder.pushFrameToCoder(encodedFrame);
                 Log.d(TAG,String.format("Frame encoded Complete %d "+ mFramesToEncode,encodedFrame.length));
                 // Frame has been encoded and sent!
-                mVideoStreamConection.send(encodedFrame);
+                if(rawFrame!=null)mVideoStreamConection.send(rawFrame);
+                // mVideoStreamConection.send(encodedFrame);
 
                 mFramesToEncode--;//  = false;
             }
@@ -49,6 +52,8 @@ public class VP8WebEncoder extends Thread{
 
     public void close(){
         mVideoStreamConection.close();
+        mVP8Encoder.stop();
+        mVP8Decoder.stop();
 //        try {
 //        mRunning = false;
 
@@ -61,7 +66,7 @@ public class VP8WebEncoder extends Thread{
         Log.d(TAG,  new String(sArr));
     }
     public void send(byte[] imageInBytes) {
-
+        rawFrame = imageInBytes;
 //        debugArray(imageInBytes);
         mVP8Encoder.pushFrameToCoder(imageInBytes);
         // this frame should be enqueue in the correct sequence
